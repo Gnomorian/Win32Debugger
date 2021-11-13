@@ -4,7 +4,7 @@
 #include <iostream>
 #include <filesystem>
 
-auto concat = [](auto...args) -> std::string
+constexpr auto concat = [](auto...args) -> std::string
 {
 	std::stringstream stream;
 	((stream << args), ...);
