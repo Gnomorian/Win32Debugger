@@ -3,5 +3,5 @@
 int main()
 {
 	Logger logger{ "./testApp.log" };
-	logger.log("blah de blah");
+	logger.log(L"blah de blah");
 }

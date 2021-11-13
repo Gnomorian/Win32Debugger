@@ -13,23 +13,23 @@ constexpr auto concat = [](auto...args) -> std::string
 
 class Logger
 {
-	std::ofstream logFile;
+	std::wofstream logFile;
 	bool mirrorToStdout{ true };
 public:
 	explicit Logger(std::filesystem::path file)
 		: logFile{ std::filesystem::absolute(file.c_str()), std::ios_base::app }
 	{}
-	void log(const std::string& msg)
+	void log(const std::wstring& msg)
 	{
 		logFile << msg << std::endl;
-		std::cout << msg << std::endl;
+		std::wcout << msg << std::endl;
 	}
 	template<typename...Args>
 	void log(Args...args)
 	{
-		std::stringstream stream;
+		std::wstringstream stream;
 		((stream << args), ...);
 		logFile << stream.str() << std::endl;
-		std::cout << stream.str() << std::endl;
+		std::wcout << stream.str() << std::endl;
 	}
 };
