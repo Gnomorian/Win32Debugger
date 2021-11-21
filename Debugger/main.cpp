@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "Debugger.h"
 #include "DebugEventListener.h"
+#include <DbgHelp.h>
 
 std::vector<std::wstring_view> getArgs(int argc, wchar_t* argv[])
 {

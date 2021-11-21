@@ -1,6 +1,7 @@
 #include "DebugEventListener.h"
 #include <conversion.h>
 #include <sstream>
+#include <map>
 
 struct ProcInfo
 {
@@ -22,12 +23,18 @@ struct ProcInfo
 
 };
 
+using DllBaseAddress = void*;
+using DllImageName = std::wstring;
+std::map<DllBaseAddress, DllImageName> loadedDlls;
+
 struct DllInfo
 {
 	const LOAD_DLL_DEBUG_INFO& dllInfo;
 	DllInfo(const LOAD_DLL_DEBUG_INFO& dll)
 		: dllInfo{ dll }
-	{}
+	{
+		rememberThisDll();
+	}
 	std::wstring imageName() const
 	{
 		if (dllInfo.fUnicode)
@@ -37,6 +44,14 @@ struct DllInfo
 		else
 		{
 			return { char_to_wchar(static_cast<const char*>(dllInfo.lpImageName)) };
+		}
+	}
+	void rememberThisDll() const
+	{
+		const auto itr{ loadedDlls.find(dllInfo.lpBaseOfDll) };
+		if (itr == loadedDlls.cend())
+		{
+			loadedDlls.emplace_hint(itr, imageName());
 		}
 	}
 };
@@ -160,6 +175,14 @@ DWORD DebugEventListener::onRip(const RIP_INFO& ripInfo)
 };
 DWORD DebugEventListener::onUnloadDll(const UNLOAD_DLL_DEBUG_INFO& dllInfo)
 {
-	//TODO: store the baseptr from the load so the unload module name can be logged.
+	const auto itr{ loadedDlls.find(dllInfo.lpBaseOfDll) };
+	if (itr != loadedDlls.cend())
+	{
+		logger.log(L"Unloaded ", itr->second);
+	}
+	else
+	{
+		logger.log(L"Unloaded unknown baseptr 0x", reinterpret_cast<size_t>(dllInfo.lpBaseOfDll));
+	}
 	return DBG_EXCEPTION_NOT_HANDLED;
 };
